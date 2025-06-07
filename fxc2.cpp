@@ -171,8 +171,6 @@ int main(int argc, char* argv[])
     print_usage_missing("entryPoint");
   if(defines == NULL)
     print_usage_missing("defines");
-  if(variableName == NULL)
-    print_usage_missing("variableName");
   if(outputFile == NULL)
     print_usage_missing("outputFile");
 
@@ -283,16 +281,20 @@ int main(int argc, char* argv[])
     FILE* f;
     errno_t err = fopen_s(&f, outputFile, "w");
 
-    fprintf(f, "const signed char %s[] =\n{\n", entryPoint);
-    for (i = 0; i < len; i++) {
-     fprintf(f, "%4i", outString[i]);
-     if (i != len - 1)
-       fprintf(f, ",");
-     if (i % 6 == 5)
-       fprintf(f, "\n");
+    if (variableName == NULL) {
+      printf("No variableName set, writing binary to output file\n");
+      fwrite(outString, sizeof(char), len, f);
+    } else {
+      fprintf(f, "const signed char %s[] =\n{\n", variableName);
+      for (i = 0; i < len; i++) {
+        fprintf(f, "%4i", outString[i]);
+        if (i != len - 1)
+          fprintf(f, ",");
+        if (i % 6 == 5)
+          fprintf(f, "\n");
+        }
+      fprintf(f, "\n};\n");
     }
-
-    fprintf(f, "\n};\n");
     fclose(f);
 
     if(verbose) {
